@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: snowflake-pipeline-console
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_API_TOKEN
+        sync: false
+      - key: SNOWFLAKE_ACCOUNT
+        sync: false
+      - key: SNOWFLAKE_USER
+        sync: false
+      - key: SNOWFLAKE_PASSWORD
+        sync: false
+      - key: SNOWFLAKE_WAREHOUSE
+        sync: false
+      - key: SNOWFLAKE_DATABASE
+        value: DATA_PLATFORM
+      - key: SNOWFLAKE_SCHEMA
+        value: CONTROL
+      - key: SNOWFLAKE_ROLE
+        sync: false
