@@ -1,22 +1,25 @@
-# Snowflake Pipeline Console (HTML/CSS/JavaScript + FastAPI)
+Snowflake Pipeline Console
+Browser (React) -> FastAPI (this service) -> Snowflake connector -> DATA_PLATFORM framework.
 
-Browser UI → HTTPS FastAPI backend → Snowflake Connector → Snowflake.
+Pages
+Overview: every file with Bronze / Silver / Gold status, auto-refresh, click a row for details
+Upload & run: drop CSV files -> PUT to @BRONZE.STG_LANDING -> CALL SP_PIPELINE() -> live step tracker
+Data quality: failed DQ rules and quarantine
+Configuration: SOURCE_CONTROL, DQ_CONFIG, COLUMN_RULES, GOLD_CONTROL (add / delete rows)
+Data explorer: preview any Bronze / Silver / Gold table
+Deploy on Render
+Push this repo to GitHub.
+Render -> New -> Blueprint -> select the repo (uses render.yaml), or New Web Service with
+build pip install -r requirements.txt and start uvicorn app:app --host 0.0.0.0 --port $PORT.
+Environment variables: APP_API_TOKEN (any long random string), SNOWFLAKE_ACCOUNT (e.g. abc12345.ap-south-1),
+SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_ROLE (optional), SNOWFLAKE_WAREHOUSE=INGEST_WH.
+Open the Render URL, enter the APP_API_TOKEN.
+Snowflake side (run once)
+Execute 01_setup.sql ... 05_pipeline.sql from the framework. The user in SNOWFLAKE_USER needs USAGE on
+DATA_PLATFORM, all schemas and INGEST_WH, WRITE on the stage, SELECT/INSERT/DELETE on CONTROL tables,
+and USAGE on the procedures (or simply the role that created them).
 
-## Deploy to Render with HTTPS
-1. Upload this folder to a GitHub repository. Never commit real credentials.
-2. In Render, create a **New Web Service** and connect the repository (or use `render.yaml` as a Blueprint).
-3. Build command: `pip install -r requirements.txt`
-4. Start command: `uvicorn app:app --host 0.0.0.0 --port $PORT`
-5. Configure environment variables shown in `render.yaml`, including a long random `APP_API_TOKEN` and your Snowflake credentials.
-6. Deploy. Render supplies an HTTPS URL. Open it and enter the app token to connect.
-
-## Local run
-Install Python 3.11+, run `pip install -r requirements.txt`, set the environment variables listed in `render.yaml`, then run `uvicorn app:app --reload` and open `http://127.0.0.1:8000`.
-
-## Production notes
-- Snowflake credentials are server-side only; never put them in frontend JavaScript.
-- This is a starter with token protection, not a full enterprise login. Prefer company SSO/OAuth, audit logging, and role-based permissions for production.
-- Grant the Snowflake service role only required privileges; do not use ACCOUNTADMIN.
-- Confirm the columns in `V_PIPELINE_RUNS`; this starter reads `SELECT *` and may need adjustment.
-- Manual and scheduled executions can overlap. Add a durable Snowflake lock/request mechanism if overlapping runs are unsafe.
-- Long-running procedures should use a background job/request table and status polling instead of a synchronous HTTP request.
+Local run
+pip install -r requirements.txt
+set the same environment variables
+uvicorn app:app --reload -> http://127.0.0.1:8000
