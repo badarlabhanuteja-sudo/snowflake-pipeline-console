@@ -2,9 +2,13 @@ services:
   - type: web
     name: snowflake-pipeline-console
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
       - key: APP_API_TOKEN
         sync: false
       - key: SNOWFLAKE_ACCOUNT
@@ -14,7 +18,7 @@ services:
       - key: SNOWFLAKE_PASSWORD
         sync: false
       - key: SNOWFLAKE_WAREHOUSE
-        sync: false
+        value: INGEST_WH
       - key: SNOWFLAKE_DATABASE
         value: DATA_PLATFORM
       - key: SNOWFLAKE_SCHEMA
